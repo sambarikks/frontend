@@ -13,28 +13,35 @@
         android:theme="@style/Theme.NewChatApp"
         tools:targetApi="31">
 
-        <!-- 로그인 액티비티 (exported=false: 외부 호출 불가) -->
+        <!-- ✅ ListActivity를 첫 화면으로 설정 -->
         <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
-
-        <!-- 회원가입 액티비티 (exported=false) -->
-        <activity
-            android:name=".SignUpActivity"
-            android:exported="false" />
-
-        <!-- 앱 실행 시 첫 번째로 실행될 메인 액티비티 -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".ListActivity"
+            android:exported="true"> <!-- exported=true로 변경 -->
             <intent-filter>
-                <!-- MAIN 액션과 LAUNCHER 카테고리 지정 -->
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- 챗봇 액티비티: 키보드가 입력필드 위로 올라오도록 adjustResize 설정 유지 -->
+        <activity android:name=".DocumentViewActivity" />
+
+        <activity
+            android:name=".ReceivedEditActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false" />
+
+        <!-- ✅ MainActivity에서는 intent-filter 제거 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true" />
+
         <activity
             android:name=".ChatActivity"
             android:exported="true"

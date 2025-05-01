@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:orientation="vertical"
+android:padding="8dp"
+android:background="@android:color/white">
+
+<!-- 문서 내용 미리보기 (직사각형 박스 영역) -->
+<TextView
+    android:id="@+id/documentContent"
+    android:layout_width="match_parent"
+    android:layout_height="150dp"
+    android:background="#EFEFEF"
+    android:padding="12dp"
+    android:text="내용 미리보기"
+    android:textSize="14sp"
+    android:textColor="#333333"
+    android:gravity="start|top"
+    android:maxLines="7"
+    android:ellipsize="end" />
+
+<!-- 제목 영역 -->
+<TextView
+    android:id="@+id/documentName"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="문서 제목"
+    android:textSize="12sp"
+    android:textColor="#888888"
+    android:gravity="center"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp" />
+
+    <ImageButton
+        android:id="@+id/menuButton"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/baseline_more_vert_24"
+        android:tint="#000000"
+        android:contentDescription="옵션 메뉴" />
+
+</LinearLayout>

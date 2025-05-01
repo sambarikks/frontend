@@ -1,7 +1,10 @@
-//2025-04-01
-//일반글 <-> 챗봇 전환 코드 수정(일반글 내용 유지, 단 챗봇에서 추가한 내용 일반글로 안넘어감)
-//말풍선 내려가도록 수정
-//입력필드 올라오도록 수정
+/*
+ * Project: TheNewChatApp
+ * Version: 1.4.0
+ * Last updated: 2025-05-01
+ * Author: SiHyeon Cheon
+ * Description: 메모 작성, 기존 파일 열기, 저장 버튼으로 목록창 이동 기능 포함 (자동 저장 완전 제거)
+ */
 
 package com.example.thenewchatapp
 
@@ -9,62 +12,88 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.io.File
-import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
-    // EditText: 메모 내용을 입력하는 영역
     private lateinit var editText: EditText
-    // 버튼: 현재 메모(대화) 내용을 ChatActivity로 전달
     private lateinit var goToChatButton: ImageButton
-    // 내부 저장소에 저장할 파일명
-    private val fileName = "notepad.txt"
+    private lateinit var saveButton: Button
+
+    private val customExtension = ".mdocx"
+    private var openedFileName: String? = null // 현재 열려있는 문서 이름
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // XML에 정의된 뷰를 초기화합니다.
         editText = findViewById(R.id.editText)
-        // XML 버튼 ID가 goToChatBotButton으로 되어 있더라도,
-        // 실제 기능은 ChatActivity 전환이므로 변수명만 변경합니다.
         goToChatButton = findViewById(R.id.goToChatBotButton)
+        saveButton = findViewById(R.id.saveButton)
 
-        // 텍스트가 변경될 때마다 자동으로 파일에 저장합니다.
-        editText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                s?.let { saveTextToFile(it.toString()) }
+        // 전달받은 파일명이 있으면 해당 파일 열기
+        openedFileName = intent.getStringExtra("fileName")
+        openedFileName?.let { fileName ->
+            val file = File(filesDir, fileName)
+            if (file.exists()) {
+                val content = file.readText()
+                editText.setText(content)
             }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
+        }
 
-        // 버튼 클릭 시, 입력된 메모(대화) 내용을 ChatActivity로 전달합니다.
+        // 챗봇 버튼 클릭 -> ChatActivity로 이동
         goToChatButton.setOnClickListener {
             val conversation = editText.text.toString()
-            // ChatActivity로 전환 (이전 ChatbotActivity 대신 ChatActivity 사용)
             val intent = Intent(this, ChatActivity::class.java)
-            // 전달할 데이터를 "conversation" 키에 담아 Intent에 추가합니다.
-            intent.putExtra("conversation", conversation) // 이 호출이 있어야 ChatActivity로 화면 전환됨
+            intent.putExtra("conversation", conversation)
             startActivity(intent)
         }
-    }
 
-    // 주어진 텍스트를 내부 저장소의 파일에 저장하는 함수입니다.
-    private fun saveTextToFile(text: String) {
-        val file = File(filesDir, fileName)
-        FileOutputStream(file).use { fos ->
-            fos.write(text.toByteArray())
+        // 저장 버튼 클릭 -> 파일 저장 후 목록으로 이동
+        saveButton.setOnClickListener {
+            saveCurrentDocument()
         }
     }
 
-    // 액티비티가 백그라운드로 전환되기 전에 현재 텍스트를 저장합니다.
+    // 명시적 저장만 담당
+    private fun saveCurrentDocument() {
+        val content = editText.text.toString().trim()
+
+        // 내용이 없으면 저장 안 함
+        if (content.isEmpty()) {
+            Toast.makeText(this, "내용이 없습니다. 저장되지 않았습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val fileName = openedFileName ?: generateFileName()
+        val file = File(filesDir, fileName)
+        file.writeText(content)
+
+        Toast.makeText(this, "저장되었습니다", Toast.LENGTH_SHORT).show()
+
+        val intent = Intent(this, ListActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        startActivity(intent)
+    }
+
+    // 새 문서용 파일명 생성
+    private fun generateFileName(): String {
+        val formatter = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
+        val time = formatter.format(Date())
+        return "노트_$time$customExtension"
+    }
+
+    // 자동 저장 완전히 제거 (onPause 비워둠)
     override fun onPause() {
         super.onPause()
-        saveTextToFile(editText.text.toString())
+        // 자동 저장 없음
     }
 }
