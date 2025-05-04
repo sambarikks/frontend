@@ -5,16 +5,39 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/saveButton"
-        android:layout_width="wrap_content"
+    <!-- 상단: 제목 입력 + 뒤로가기 버튼 + 저장 버튼 -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="저장하기"
-        android:layout_gravity="end" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="8dp">
 
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:contentDescription="뒤로가기" />
 
+        <EditText
+            android:id="@+id/titleEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="제목"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-    <!-- 기본 밑줄을 제거한 EditText -->
+        <!-- 저장 버튼 (숨기려면 이 부분을 주석 처리하세요) -->
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="저장" />
+    </LinearLayout>
+
+    <!-- 본문 입력 영역 -->
     <EditText
         android:id="@+id/editText"
         android:layout_width="match_parent"
@@ -26,6 +49,7 @@
         android:scrollbars="vertical"
         android:background="@null" />
 
+    <!-- 챗봇 이동 버튼 유지 -->
     <ImageButton
         android:id="@+id/goToChatBotButton"
         android:layout_width="45dp"
@@ -34,9 +58,7 @@
         android:layout_marginEnd="20dp"
         android:layout_gravity="end"
         android:background="@drawable/btn_background"
-        android:src="@drawable/baseline_chat_24" />
-
-
-
+        android:src="@drawable/baseline_chat_24"
+        android:contentDescription="챗봇으로 이동" />
 
 </LinearLayout>

@@ -1,25 +1,30 @@
 package com.example.thenewchatapp
 
-import android.view.Gravity
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.PopupMenu
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ListAdapter(
-    private val documents: List<String>,
-    private val onClick: (String) -> Unit,
-    private val onMenuAction: (fileName: String, action: String) -> Unit
+    private var documents: List<String>,
+    private val onItemClick: (String) -> Unit,
+    private val onSelectionChanged: (List<String>) -> Unit
 ) : RecyclerView.Adapter<ListAdapter.DocumentViewHolder>() {
 
+    private val selectedItems = mutableSetOf<String>()
+    private var selectionMode = false
+
     inner class DocumentViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val documentContent: TextView = view.findViewById(R.id.documentContent)  // 문서 내용 표시 영역
-        val documentName: TextView = view.findViewById(R.id.documentName)        // 제목 표시 영역
-        val menuButton: ImageButton = view.findViewById(R.id.menuButton)         // 점 3개 메뉴 버튼
+        val documentContent: TextView = view.findViewById(R.id.documentContent)
+        val documentName: TextView = view.findViewById(R.id.documentName)
+        val documentDate: TextView = view.findViewById(R.id.documentDate)
+        val checkMark: ImageView = view.findViewById(R.id.checkMark)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DocumentViewHolder {
@@ -28,62 +33,97 @@ class ListAdapter(
         return DocumentViewHolder(view)
     }
 
+    override fun getItemCount(): Int = documents.size
+
     override fun onBindViewHolder(holder: DocumentViewHolder, position: Int) {
         val fileName = documents[position]
-
-        // 제목 설정 (파일명)
-        holder.documentName.text = fileName
-
-        // 문서 내용 읽어서 미리보기로 표시
         val file = File(holder.itemView.context.filesDir, fileName)
+
+        // ✅ 문서 내용 미리보기
         if (file.exists()) {
-            val content = file.readText()
-            holder.documentContent.text = content
+            holder.documentContent.text = file.readText()
         } else {
-            holder.documentContent.text = "(파일이 존재하지 않습니다)"
+            holder.documentContent.text = ""
         }
 
-        // 문서 클릭 → MainActivity 열기
+        // ✅ 문서 제목 (확장자 제거 및 자동제목시만 텍스트 노트 유지)
+        val pureTitle = fileName.removeSuffix(".mdocx").substringBefore("_")
+        holder.documentName.text = pureTitle
+
+        // ✅ 문서 작성일 (수정일 기준)
+        val lastModified = file.lastModified()
+        val date = Date(lastModified)
+        val calendar = Calendar.getInstance().apply { time = date }
+        val today = Calendar.getInstance()
+
+        val dateText = when {
+            calendar.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+                    calendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) -> {
+                SimpleDateFormat("a h:mm", Locale.getDefault()).format(date)
+            }
+            calendar.get(Calendar.YEAR) == today.get(Calendar.YEAR) -> {
+                SimpleDateFormat("M월 d일", Locale.getDefault()).format(date)
+            }
+            else -> {
+                SimpleDateFormat("yyyy년 M월 d일", Locale.getDefault()).format(date)
+            }
+        }
+
+        holder.documentDate.text = dateText
+
+        // ✅ 선택 모드 표시
+        if (selectionMode) {
+            holder.checkMark.visibility = View.VISIBLE
+            holder.checkMark.setImageResource(
+                if (selectedItems.contains(fileName)) R.drawable.ic_check_circle else R.drawable.ic_check_circle_outline
+            )
+        } else {
+            holder.checkMark.visibility = View.GONE
+        }
+
+        // ✅ 클릭 이벤트 처리
         holder.itemView.setOnClickListener {
-            onClick(fileName)
+            if (selectionMode) {
+                toggleSelection(fileName)
+            } else {
+                onItemClick(fileName)
+            }
         }
 
-        // 점 3개 버튼 클릭 → PopupMenu
-        holder.menuButton.setOnClickListener { view ->
-            val popup = PopupMenu(view.context, view, Gravity.END) // Gravity.END → 오른쪽 정렬
-
-            popup.menuInflater.inflate(R.menu.document_item_menu, popup.menu)
-
-            popup.setOnMenuItemClickListener { menuItem ->
-                when (menuItem.itemId) {
-                    R.id.menu_delete -> {
-                        onMenuAction(fileName, "delete")
-                        true
-                    }
-                    else -> false
-                }
+        holder.itemView.setOnLongClickListener {
+            if (!selectionMode) {
+                selectionMode = true
+                selectedItems.add(fileName)
+                notifyDataSetChanged()
+                onSelectionChanged(selectedItems.toList())
             }
-
-            // 아이콘 표시 강제 적용 (일부 테마에서 필요)
-            try {
-                val fields = popup.javaClass.declaredFields
-                for (field in fields) {
-                    if (field.name == "mPopup") {
-                        field.isAccessible = true
-                        val menuPopupHelper = field.get(popup)
-                        val classPopupHelper = Class.forName(menuPopupHelper.javaClass.name)
-                        val setForceIcons = classPopupHelper.getMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
-                        setForceIcons.invoke(menuPopupHelper, true)
-                        break
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            popup.show()
+            true
         }
     }
 
-    override fun getItemCount(): Int = documents.size
+    // ✅ 선택 처리
+    private fun toggleSelection(fileName: String) {
+        if (selectedItems.contains(fileName)) {
+            selectedItems.remove(fileName)
+        } else {
+            selectedItems.add(fileName)
+        }
+
+        if (selectedItems.isEmpty()) {
+            selectionMode = false
+        }
+
+        notifyDataSetChanged()
+        onSelectionChanged(selectedItems.toList())
+    }
+
+    // ✅ 선택된 아이템 반환
+    fun getSelectedItems(): List<String> = selectedItems.toList()
+
+    // ✅ 선택모드 초기화
+    fun clearSelection() {
+        selectedItems.clear()
+        selectionMode = false
+        notifyDataSetChanged()
+    }
 }
