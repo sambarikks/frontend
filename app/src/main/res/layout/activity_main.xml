@@ -17,25 +17,36 @@
             android:id="@+id/backButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:contentDescription="뒤로가기" />
+            android:src="@drawable/baseline_arrow_back_24"
+            android:contentDescription="뒤로가기"
+            android:background="@android:color/transparent"/>
 
         <EditText
             android:id="@+id/titleEditText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="10dp"
             android:hint="제목"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:background="@null"/>
 
         <!-- 저장 버튼 (숨기려면 이 부분을 주석 처리하세요) -->
-        <Button
-            android:id="@+id/saveButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="저장" />
+<!--        <Button-->
+<!--            android:id="@+id/saveButton"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="저장" />-->
+
+
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#d9d9d9" />
+
 
     <!-- 본문 입력 영역 -->
     <EditText
@@ -43,6 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:layout_marginTop="10dp"
         android:hint="메모를 입력하세요"
         android:gravity="top"
         android:inputType="textMultiLine"

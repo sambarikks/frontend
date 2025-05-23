@@ -4,39 +4,79 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
-import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import java.io.File
 
 class ListActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var listAdapter: ListAdapter
-    private lateinit var createButton: ImageButton
+    private lateinit var createButton: ExtendedFloatingActionButton
+    private lateinit var fabField: ExtendedFloatingActionButton
+    private lateinit var fabWrite: ExtendedFloatingActionButton
+    private lateinit var fabChat: ExtendedFloatingActionButton
     private lateinit var bottomBar: LinearLayout
     private lateinit var buttonRename: TextView
     private lateinit var buttonDelete: TextView
+
+    private var isFabOpen = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
 
         recyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
+
         createButton = findViewById(R.id.buttonCreateDocument)
+        fabField = findViewById(R.id.fab_field)
+        fabWrite = findViewById(R.id.fab_write)
+        fabChat = findViewById(R.id.fab_chat)
+
         bottomBar = findViewById(R.id.bottomBar)
         buttonRename = findViewById(R.id.buttonRename)
         buttonDelete = findViewById(R.id.buttonDelete)
 
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        val iconMenu = findViewById<ImageView>(R.id.icon_menu)
+        val iconSearch = findViewById<ImageView>(R.id.icon_search)
+        val iconMore = findViewById<ImageView>(R.id.icon_more)
+
+        iconMenu.setOnClickListener {
+            Toast.makeText(this, "햄버거 메뉴 클릭됨", Toast.LENGTH_SHORT).show()
+        }
+
+        iconSearch.setOnClickListener {
+            Toast.makeText(this, "검색 클릭됨", Toast.LENGTH_SHORT).show()
+        }
+
+        iconMore.setOnClickListener {
+            Toast.makeText(this, "더보기 클릭됨", Toast.LENGTH_SHORT).show()
+        }
 
         createButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            toggleFabMenu()
+        }
+
+        fabField.setOnClickListener {
+            startActivity(Intent(this, FieldActivity::class.java))
+        }
+
+        fabWrite.setOnClickListener {
+            toggleFabMenu()
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+
+        fabChat.setOnClickListener {
+            toggleFabMenu()
+            startActivity(Intent(this, ChatActivity::class.java))
         }
 
         loadDocumentsAndCreateAdapter()
@@ -53,6 +93,29 @@ class ListActivity : AppCompatActivity() {
             if (selected.isNotEmpty()) {
                 showDeleteDialog(selected)
             }
+        }
+    }
+
+    private fun toggleFabMenu() {
+        if (isFabOpen) {
+            fabWrite.hide()
+            fabChat.hide()
+            fabField.hide()
+            createButton.animate().rotation(0f).setDuration(200).start()
+        } else {
+            fabWrite.show()
+            fabChat.show()
+            fabField.show()
+            createButton.animate().rotation(45f).setDuration(200).start()
+        }
+        isFabOpen = !isFabOpen
+    }
+
+    override fun onBackPressed() {
+        if (isFabOpen) {
+            toggleFabMenu()
+        } else {
+            super.onBackPressed()
         }
     }
 
@@ -80,7 +143,6 @@ class ListActivity : AppCompatActivity() {
     private fun loadDocuments(): List<File> {
         return filesDir.listFiles()?.filter {
             it.name.endsWith(".mdocx")
-                    // || !it.name.contains(".") // 모든 확장자 보기
         }?.sortedByDescending { it.lastModified() } ?: emptyList()
     }
 
@@ -99,7 +161,7 @@ class ListActivity : AppCompatActivity() {
                 val newName = editText.text.toString().trim()
                 if (newName.isNotEmpty()) {
                     val file = File(filesDir, fileName)
-                    val newFile = File(filesDir, newName + ".mdocx")
+                    val newFile = File(filesDir, "$newName.mdocx")
                     file.renameTo(newFile)
                     loadDocumentsAndCreateAdapter()
                 }

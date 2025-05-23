@@ -1,21 +1,22 @@
 /*
  * Project: TheNewChatApp
- * Version: 2.0.0
- * Last updated: 2025-05-04
+ * Version: 3.0.0
+ * Last updated: 2025-05-24
  * Author: SiHyeon Cheon
  *
  * [Description]
- * 메모 작성 및 저장, 불러오기 기능을 담당하는 메인 에디터 화면.
+ * 작성된 문서 목록을 표시하고, 문서를 생성/삭제/편집하거나 챗봇과 연결할 수 있는 홈 화면 역할을 담당.
+ * 상단에는 로고와 앱 이름, 아이콘 메뉴(햄버거·검색·점3개)를 포함하며 스크롤에 따라 동작이 달라지는 UX를 지원.
  *
  * [주요 기능]
- * - 기존 문서 열기 및 불러오기
- * - 새 문서 작성 및 자동/수동 저장 기능
- * - 사용자가 입력한 제목과 자동 제목(텍스트 노트 MMdd_HHmmss) 규칙 적용
- * - 사용자가 입력하지 않을 경우 제목 칸은 빈 상태 유지 (자동 제목만 파일에 사용됨)
- * - 저장 시 기존 문서를 열어둔 상태일 경우 덮어쓰기 처리 (중복 저장 방지)
- * - ChatActivity로 글 내용을 전달해 AI와 대화 시작 가능
- * - 빈 내용일 경우 저장하지 않음
- * - 수동 저장 버튼과 뒤로가기 버튼 모두 저장 트리거로 동작
+ * - 작성된 문서 목록을 2열 그리드로 표시
+ * - + 버튼으로 새 문서 작성 (MainActivity), 작문 도우미(ChatActivity), 요구사항 입력(FieldActivity) 연결
+ * - 문서 항목 클릭 시 열기, 길게 클릭 시 선택 모드 진입 (제목 수정, 삭제 가능)
+ * - 문서 저장은 내부 저장소에 `.mdocx` 파일로 관리되며, 수정 시 자동 반영됨
+ * - 하단 FAB 버튼들은 선택 모드일 경우 자동 숨김 처리
+ * - 앱 상단 인터페이스에 로고 이미지, 앱 이름, 아이콘 메뉴 포함
+ * - 스크롤 시 로고는 위로 사라지고, 아이콘 메뉴는 상단에 고정됨
+ * - 햄버거·검색·점3개 아이콘에 클릭 리스너 등록 (후속 기능 연결 준비)
  */
 
 
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         editText = findViewById(R.id.editText)
         backButton = findViewById(R.id.backButton)
         goToChatBotButton = findViewById(R.id.goToChatBotButton)
-        saveButton = findViewById<Button?>(R.id.saveButton)
+//        saveButton = findViewById<Button?>(R.id.saveButton)
 
         saveButton?.setOnClickListener {
             val content = editText.text.toString().trim()

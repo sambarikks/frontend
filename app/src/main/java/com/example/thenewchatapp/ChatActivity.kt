@@ -3,6 +3,7 @@ package com.example.thenewchatapp
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +29,7 @@ import org.json.JSONObject
 
 // 데이터 클래스: 하나의 채팅 메시지를 표현합니다.
 data class ChatMessage(
-    val message: String,
+    var message: String,
     val type: MessageType
 )
 
@@ -128,12 +129,53 @@ class ChatActivity : AppCompatActivity() {
                 chatRecyclerView.smoothScrollToPosition(chatMessages.size - 1) // **수정 위치 2**
                 messageEditText.text.clear()
 
+                // (이 코드는 messageEditText.text.clear() 아래에 추가하세요)
+                val responseMessage = ChatMessage("", MessageType.RECEIVED)
+                chatMessages.add(responseMessage)
+                val responseIndex = chatMessages.size - 1
+                chatAdapter.notifyItemInserted(responseIndex)
+                chatRecyclerView.smoothScrollToPosition(responseIndex)
+
+
                 // 외부 API 또는 로직에 따른 응답 메시지 생성 후 추가
-                val replyMessage = externalReply(sentMessage)
-                val newReceivedMessage = ChatMessage(replyMessage, MessageType.RECEIVED)
-                chatMessages.add(newReceivedMessage)
-                chatAdapter.notifyItemInserted(chatMessages.size - 1)
-                chatRecyclerView.smoothScrollToPosition(chatMessages.size - 1) // **수정 위치 2**
+//                val replyMessage = externalReply(sentMessage)
+//                val newReceivedMessage = ChatMessage(replyMessage, MessageType.RECEIVED)
+//                chatMessages.add(newReceivedMessage)
+//                chatAdapter.notifyItemInserted(chatMessages.size - 1)
+//                chatRecyclerView.smoothScrollToPosition(chatMessages.size - 1) // **수정 위치 2**
+
+
+                // 이거는 한글자 한글자 줄바꿈 되버리는 코드
+//                CoroutineScope(Dispatchers.Main).launch {
+//                    chatAdapter.sendChatRequest(sentMessage) { chunk ->
+//                        val receivedChunk = ChatMessage(chunk, MessageType.RECEIVED)
+//                        chatMessages.add(receivedChunk)
+//                        chatAdapter.notifyItemInserted(chatMessages.size - 1)
+//                        chatRecyclerView.smoothScrollToPosition(chatMessages.size - 1)
+//                    }
+//                }
+
+                // 이게 정상출력되게 고친 코드래
+                CoroutineScope(Dispatchers.Main).launch {
+                    // 1. 먼저 빈 응답 메시지를 하나 추가해두고
+                    val responseMessage = ChatMessage("", MessageType.RECEIVED)
+                    chatMessages.add(responseMessage)
+                    val responseIndex = chatMessages.size - 1
+                    chatAdapter.notifyItemInserted(responseIndex)
+                    chatRecyclerView.smoothScrollToPosition(responseIndex)
+
+                    // 2. 응답 청크를 누적해서 같은 메시지에 덧붙이기
+                    chatAdapter.sendChatRequest(sentMessage) { chunk ->
+                        responseMessage.message += chunk // 기존 객체 내부 필드만 수정
+                        chatAdapter.notifyItemChanged(responseIndex)
+                        chatRecyclerView.smoothScrollToPosition(responseIndex)
+                    }
+
+                }
+
+
+
+
             }
         }
 
@@ -212,7 +254,7 @@ class ChatAdapter(
             val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
             val requestBody = json.toString().toRequestBody(mediaType)
             val request = Request.Builder()
-                .url("http://10.0.2.2:8000/stream-chat") // URL 확인 필요
+                .url("http://54.252.159.52:5000/stream-chat") // URL 확인 필요
                 .post(requestBody)
                 .build()
 
@@ -237,8 +279,7 @@ class ChatAdapter(
 
                         val available = source.buffer.size
                         if (available > 0) {
-                            val bytesToRead =
-                                if (available >= fixedBufferSize) fixedBufferSize else available
+                            val bytesToRead = if (available >= fixedBufferSize) fixedBufferSize else available
                             val chunk = try {
                                 source.readUtf8(bytesToRead)
                             } catch (readEx: Exception) {
@@ -254,6 +295,10 @@ class ChatAdapter(
                     }
                 }
             } catch (e: Exception) {
+
+                // ✅ 디버깅용 전체 예외 로그 출력 (Logcat에서 확인 가능)
+                Log.e("ChatAPI", "Socket error occurred", e)
+
                 withContext(Dispatchers.Main) {
                     onChunk("Stream Error: ${e.message}")
                 }

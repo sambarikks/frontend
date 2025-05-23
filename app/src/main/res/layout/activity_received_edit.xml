@@ -22,7 +22,7 @@
             android:layout_gravity="end"
             android:paddingHorizontal="16dp"
             android:text="저장"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textSize="16sp"
             android:gravity="center" />
     </androidx.appcompat.widget.Toolbar>

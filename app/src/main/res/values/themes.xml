@@ -3,6 +3,11 @@
     <style name="Base.Theme.NewChatApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <item name="colorPrimary">#B9E6FB</item> <!-- 메인 색상: 연하늘색 -->
+        <item name="colorPrimaryVariant">#90D7F2</item> <!-- 더 진한 보조 색상 (임의 추천) -->
+        <item name="colorOnPrimary">#000000</item> <!-- 연한 배경이므로 글씨는 검정색 -->
+
     </style>
 
     <style name="Theme.NewChatApp" parent="Base.Theme.NewChatApp" />
