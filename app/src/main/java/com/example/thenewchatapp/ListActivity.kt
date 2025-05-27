@@ -1,3 +1,5 @@
+// ✅ 팝업 제거 및 하단 바 중심으로 정리된 ListActivity.kt
+
 package com.example.thenewchatapp
 
 import android.content.Intent
@@ -112,10 +114,14 @@ class ListActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (isFabOpen) {
-            toggleFabMenu()
-        } else {
-            super.onBackPressed()
+        when {
+            isFabOpen -> toggleFabMenu()
+            listAdapter.getSelectedItems().isNotEmpty() -> {
+                listAdapter.clearSelection()
+                bottomBar.visibility = View.GONE
+                createButton.visibility = View.VISIBLE
+            }
+            else -> super.onBackPressed()
         }
     }
 
@@ -127,7 +133,8 @@ class ListActivity : AppCompatActivity() {
     private fun loadDocumentsAndCreateAdapter() {
         val documentList = loadDocuments().map { file -> file.name }
 
-        listAdapter = ListAdapter(documentList,
+        listAdapter = ListAdapter(
+            documentList,
             onItemClick = { fileName ->
                 openDocument(fileName)
             },

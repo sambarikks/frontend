@@ -6,7 +6,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ChatActivity">
+    tools:context=".ChatActivity"
+    android:background="#ffffff">
 
     <!-- 채팅 내용을 보여주는 RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
@@ -64,6 +65,18 @@
         android:layout_marginEnd="20dp"
         android:background="@drawable/btn_background"
         android:src="@drawable/baseline_text_snippet_24" />
+
+    <ImageButton
+        android:id="@+id/CreateResultButton"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="20dp"
+
+        android:layout_marginBottom="80dp"
+        android:background="@drawable/btn_background"
+        android:src="@drawable/baseline_auto_awesome_24"
+        app:layout_constraintBottom_toTopOf="@id/input_layout"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

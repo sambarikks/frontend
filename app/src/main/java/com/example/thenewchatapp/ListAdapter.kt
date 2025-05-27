@@ -1,6 +1,7 @@
+// ✅ 팝업 제거 및 하단 바 중심으로 정리된 ListAdapter.kt
+
 package com.example.thenewchatapp
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,18 +40,11 @@ class ListAdapter(
         val fileName = documents[position]
         val file = File(holder.itemView.context.filesDir, fileName)
 
-        // ✅ 문서 내용 미리보기
-        if (file.exists()) {
-            holder.documentContent.text = file.readText()
-        } else {
-            holder.documentContent.text = ""
-        }
+        holder.documentContent.text = if (file.exists()) file.readText() else ""
 
-        // ✅ 문서 제목 (확장자 제거 및 자동제목시만 텍스트 노트 유지)
         val pureTitle = fileName.removeSuffix(".mdocx").substringBefore("_")
         holder.documentName.text = pureTitle
 
-        // ✅ 문서 작성일 (수정일 기준)
         val lastModified = file.lastModified()
         val date = Date(lastModified)
         val calendar = Calendar.getInstance().apply { time = date }
@@ -71,7 +65,6 @@ class ListAdapter(
 
         holder.documentDate.text = dateText
 
-        // ✅ 선택 모드 표시
         if (selectionMode) {
             holder.checkMark.visibility = View.VISIBLE
             holder.checkMark.setImageResource(
@@ -81,7 +74,6 @@ class ListAdapter(
             holder.checkMark.visibility = View.GONE
         }
 
-        // ✅ 클릭 이벤트 처리
         holder.itemView.setOnClickListener {
             if (selectionMode) {
                 toggleSelection(fileName)
@@ -101,7 +93,6 @@ class ListAdapter(
         }
     }
 
-    // ✅ 선택 처리
     private fun toggleSelection(fileName: String) {
         if (selectedItems.contains(fileName)) {
             selectedItems.remove(fileName)
@@ -117,10 +108,8 @@ class ListAdapter(
         onSelectionChanged(selectedItems.toList())
     }
 
-    // ✅ 선택된 아이템 반환
     fun getSelectedItems(): List<String> = selectedItems.toList()
 
-    // ✅ 선택모드 초기화
     fun clearSelection() {
         selectedItems.clear()
         selectionMode = false

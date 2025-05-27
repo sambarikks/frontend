@@ -23,6 +23,7 @@
 
 package com.example.thenewchatapp
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
@@ -52,17 +53,50 @@ class MainActivity : AppCompatActivity() {
         goToChatBotButton = findViewById(R.id.goToChatBotButton)
 //        saveButton = findViewById<Button?>(R.id.saveButton)
 
+        // 챗봇 답변 내용 편집을 메인엑티비티로 변경했을 때 쓰이는 코드
+        // EditText 초기화 이후 onCreate 안에 추가
+        intent.getStringExtra("originalText")?.let { originalText ->
+            editText.setText(originalText)
+        }
+
+        val isFromChat = intent.hasExtra("messagePosition")
+
         saveButton?.setOnClickListener {
             val content = editText.text.toString().trim()
             if (content.isEmpty()) {
                 Toast.makeText(this, "입력한 내용이 없어 저장하지 않았습니다.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            // ✅ ChatActivity에서 왔을 경우: 결과 반환 후 종료
+            if (intent.hasExtra("messagePosition")) {
+                val resultIntent = Intent().apply {
+                    putExtra("editedText", content)
+                    putExtra("messagePosition", intent.getIntExtra("messagePosition", -1))
+                }
+                setResult(Activity.RESULT_OK, resultIntent)
+                finish()
+                return@setOnClickListener
+            }
+
+            // ✅ 평소대로 저장
             saveIfNeeded(forceSave = true)
         }
 
+        // 여기까지 챗봇 답변 편집
+
+        // 이건 원래 저장 로직
+//        saveButton?.setOnClickListener {
+//            val content = editText.text.toString().trim()
+//            if (content.isEmpty()) {
+//                Toast.makeText(this, "입력한 내용이 없어 저장하지 않았습니다.", Toast.LENGTH_SHORT).show()
+//                return@setOnClickListener
+//            }
+//            saveIfNeeded(forceSave = true)
+//        }
+
         backButton.setOnClickListener {
-            finish()
+            onBackPressed()  // ✅ 시스템 뒤로가기처럼 자동 저장 후 finish()까지 작동
         }
 
         goToChatBotButton.setOnClickListener {
