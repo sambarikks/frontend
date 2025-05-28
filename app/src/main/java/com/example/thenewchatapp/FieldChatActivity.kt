@@ -27,9 +27,8 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import androidx.activity.viewModels
-import android.widget.FrameLayout
 
-class ChatActivity : AppCompatActivity() {
+class FieldChatActivity : AppCompatActivity() {
 
     private lateinit var chatRecyclerView: RecyclerView
     private lateinit var messageEditText: EditText
@@ -38,11 +37,10 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var createResultButton: ImageButton
     private lateinit var btnPlus: ImageButton
     private lateinit var btnVoice: ImageButton
+    private lateinit var btnDropdown: ImageButton
     private lateinit var recyclerCategory: RecyclerView
     private lateinit var recyclerEntry: RecyclerView
     private val viewModel: FieldViewModel by viewModels()
-    private lateinit var chatContainer: FrameLayout
-    private lateinit var fragmentContainer: FrameLayout
 
     private val chatMessages = mutableListOf<ChatMessage>()
     private lateinit var chatAdapter: ChatAdapter
@@ -84,7 +82,7 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        setContentView(R.layout.activity_chat)
+        setContentView(R.layout.activity_chat_field)
 
         // 시스템 바/IME 패딩 처리
         val mainView = findViewById<View>(R.id.mainLayout)
@@ -102,14 +100,38 @@ class ChatActivity : AppCompatActivity() {
         goToEditButton = findViewById(R.id.goToEditButton)
         createResultButton = findViewById(R.id.CreateResultButton)
         btnPlus         = findViewById(R.id.btnPlus)
+        btnDropdown     = findViewById(R.id.btnFieldDropdown)
         recyclerCategory= findViewById(R.id.recyclerEasyCommand)
         recyclerEntry   = findViewById(R.id.recyclerCommandEntry)
         btnVoice = findViewById(R.id.btnVoice)
-        chatContainer     = findViewById(R.id.chatContainer)
-        fragmentContainer = findViewById(R.id.fragmentContainer)
 
         // ViewModel 기본 제목 초기화 (한 번만)
         viewModel.initTitles(fieldKeys)
+
+        // ② 드롭다운 메뉴: ViewModel 동기화 제목 사용
+        btnDropdown.setOnClickListener { anchor ->
+            PopupMenu(this, anchor).apply {
+                fieldKeys.forEach { key ->
+                    menu.add(viewModel.getTitle(key))
+                }
+                setOnMenuItemClickListener { item ->
+                    val selectedLabel = item.title.toString()
+                    val key = fieldKeys.first { viewModel.getTitle(it) == selectedLabel }
+
+                    // ③ 현재 입력 내용 저장
+                    viewModel.setContent(key, messageEditText.text.toString())
+
+                    // ④ 선택된 필드로 재진입
+                    val frag = FieldDetailFragment.newInstance(key, viewModel.getContent(key))
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, frag)
+                        .addToBackStack(null)
+                        .commit()
+                    true
+                }
+                show()
+            }
+        }
 
         // **1) ViewModel에 기본 필드명 채우기**
         val fieldKeys = fields.map { it.title }
@@ -165,17 +187,9 @@ class ChatActivity : AppCompatActivity() {
         // ➕ 버튼 팝업 메뉴
         btnPlus.setOnClickListener { anchorView ->
             PopupMenu(this, anchorView).apply {
-                menu.add("일반 글 화면").setOnMenuItemClickListener {
-                    startActivity(Intent(this@ChatActivity, MainActivity::class.java))
-                    true
-                }
                 menu.add("필드 화면").setOnMenuItemClickListener {
-                    // 채팅 UI 숨기고
-                    chatContainer.visibility     = View.GONE
-                    // 필드 화면 보이기
-                    fragmentContainer.visibility = View.VISIBLE
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer, MainFragment())
+                        .replace(R.id.fragmentContainer, MainFragment())  // ← 여기
                         .addToBackStack(null)
                         .commit()
                     true
@@ -226,6 +240,16 @@ class ChatActivity : AppCompatActivity() {
                 recyclerEntry.visibility = View.GONE
             }
         }
+
+       fun onBackPressed() {
+            if (messageEditText.hasFocus()) {
+                // EditText에 포커스 남아 있으면 해제만
+                messageEditText.clearFocus()
+                } else {
+                // 그렇지 않으면 기본 뒤로가기
+                super.onBackPressed()
+                }
+            }
 
         // 결과 생성 버튼 클릭
         createResultButton.setOnClickListener {
@@ -495,15 +519,5 @@ class ChatActivity : AppCompatActivity() {
 
     companion object {
         fun newInstance(): FieldChatActivity = FieldChatActivity()
-    }
-
-    override fun onBackPressed() {
-        if (fragmentContainer.visibility == View.VISIBLE) {
-            supportFragmentManager.popBackStack()
-            fragmentContainer.visibility = View.GONE
-            chatContainer.visibility     = View.VISIBLE
-        } else {
-            super.onBackPressed()
-        }
     }
 }

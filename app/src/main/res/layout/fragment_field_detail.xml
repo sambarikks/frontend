@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/mainLayout"
+    android:id="@+id/detailLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -26,43 +26,64 @@
         android:contentDescription="필드 선택"
         app:tint="@color/btn_icon" />
 
-    <!-- ② 필드 리스트(RecylerView) -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <!-- ② 제목 입력 -->
+    <EditText
+        android:id="@+id/editTextTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/btnFieldDropdown"
         android:layout_marginTop="8dp"
-        android:overScrollMode="always"/>
+        android:hint="제목을 입력하세요"
+        android:background="@drawable/edit_text_background"
+        android:textColor="@color/text_main"
+        android:textColorHint="@color/hint_text" />
 
-    <!-- 음성 인식 + 버튼 (오른쪽 아래 고정) -->
+    <!-- ③ 본문 입력 -->
+    <EditText
+        android:id="@+id/editTextContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/editTextTitle"
+        android:layout_above="@id/overlayButtons"
+        android:layout_marginTop="8dp"
+        android:hint="내용을 작성하세요"
+        android:background="@drawable/edit_text_background"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        android:padding="12dp"
+        android:overScrollMode="always"
+        android:textColor="@color/text_main"
+        android:textColorHint="@color/hint_text" />
+
+    <!-- ④ 하단 오버레이: 플러스 위에 음성 버튼 -->
     <LinearLayout
-        android:id="@+id/floatingButtons"
+        android:id="@+id/overlayButtons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:orientation="vertical"
-        android:layout_margin="12dp">
+        android:padding="8dp">
 
         <ImageButton
-            android:id="@+id/btnPlus"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:id="@+id/detailBtnPlus"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/round_button"
+            app:srcCompat="@drawable/ic_add"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/round_button"
-            android:contentDescription="plus"
-            android:src="@drawable/ic_add"
+            android:contentDescription="메뉴"
             app:tint="@color/btn_icon" />
 
         <ImageButton
-            android:id="@+id/btnVoice"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:id="@+id/detailBtnVoice"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/round_button"
-            android:src="@drawable/ic_mic"
-            android:contentDescription="voice"
+            app:srcCompat="@drawable/ic_mic"
+            android:contentDescription="음성인식"
             app:tint="@color/btn_icon" />
+
     </LinearLayout>
 
     <FrameLayout
